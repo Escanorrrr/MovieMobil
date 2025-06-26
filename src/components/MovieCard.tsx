@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { Movie } from '../services/movieService';
+import { Movie } from '../entities/Movie';
 import { IMAGE_URL } from '../config';
+import { COLORS } from '../styles/colors';
+import { FONT, SPACING, RADIUS } from '../styles/theme';
 
 type Props = {
   movie: Movie;
@@ -23,9 +25,9 @@ export default function MovieCard({ movie, onPress }: Props) {
 }
 
 const styles = StyleSheet.create({
-  card: { flexDirection: 'row', marginBottom: 15 },
-  image: { width: 100, height: 150, borderRadius: 6 },
-  info: { flex: 1, marginLeft: 10, justifyContent: 'center' },
-  title: { fontSize: 16, fontWeight: 'bold' },
-  rating: { fontSize: 14, color: '#888' },
+  card: { flexDirection: 'row', marginBottom: SPACING.md, backgroundColor: COLORS.cardBackground, borderRadius: RADIUS.md, borderColor: COLORS.cardBorder, borderWidth: 1, overflow: 'hidden' },
+  image: { width: 100, height: 150, borderRadius: RADIUS.md },
+  info: { flex: 1, marginLeft: SPACING.md, justifyContent: 'center' },
+  title: { fontSize: FONT.size.md, fontWeight: 'bold', color: COLORS.textDark, fontFamily: FONT.family.bold },
+  rating: { fontSize: FONT.size.sm, color: COLORS.secondary, fontFamily: FONT.family.regular },
 });
