@@ -12,6 +12,7 @@ import MovieTitleAndRating from '../components/MovieTitleAndRating';
 import MovieDetails from '../components/MovieDetails';
 import MovieOverview from '../components/MovieOverview';
 import ActorList from '../components/ActorList';
+import ErrorBox from '../components/ErrorBox';
 
 type RootStackParamList = {
   MovieDetail: { movie: Movie };
@@ -26,6 +27,7 @@ export default function MovieDetailScreen() {
   const [movieDetail, setMovieDetail] = useState<MovieDetailDto | null>(null);
   const [actors, setActors] = useState<Actor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadMovieData = async () => {
@@ -34,16 +36,14 @@ export default function MovieDetailScreen() {
           fetchMovieDetail(movie.id),
           fetchMovieCredits(movie.id)
         ]);
-        
         setMovieDetail(detailData);
-        setActors(creditsData.cast.slice(0, 10)); // İlk 10 aktörü al
-      } catch (error) {
-        console.error('Film verileri yüklenirken hata:', error);
+        setActors(creditsData.cast.slice(0, 10));
+      } catch (error: any) {
+        setError(error.message || 'Film verileri yüklenirken hata oluştu.');
       } finally {
         setLoading(false);
       }
     };
-
     loadMovieData();
   }, [movie.id]);
 
@@ -58,6 +58,7 @@ export default function MovieDetailScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      {error && <ErrorBox message={error} onClose={() => setError(null)} />}
       {/* Film Posteri */}
       <Image 
         source={{ uri: `${IMAGE_URL}${movie.poster_path}` }} 
