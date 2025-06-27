@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Alert, TextInput } from 'react-native';
-import { fetchPopularMovies, fetchSearchedMovies } from '../services/movieService';
+import { fetchPopularMovies, fetchSearchedMovies, fetchMoviesByCategory, MovieCategory } from '../services/movieService';
 import MovieCard from '../components/MovieCard';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,6 +9,8 @@ import { FONT, SPACING } from '../styles/theme';
 import { Movie } from '../entities/Movie';
 import ErrorBox from '../components/ErrorBox';
 import SearchBar from '../components/SearchBar';
+import MovieCardSkeleton from '../components/MovieCardSkeleton';
+import CategoryTabs from '../components/CategoryTabs';
 
 
 type RootStackParamList = {
@@ -21,17 +23,27 @@ export default function MovieListScreen() {
   const [error, setError] = useState<string | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [category, setCategory] = useState<MovieCategory>('popular');
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
-    fetchPopularMovies()
+    setLoading(true);
+    fetchMoviesByCategory(category)
       .then(setMovies)
-      .catch((err) => setError(err.message));
-  }, []);
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [category]);
+
+  const handleCategoryChange = (cat: MovieCategory) => {
+    setCategory(cat);
+    setError(null);
+  };
 
   const handleSearch = async (query: string) => {
     setSearching(true);
     setError(null);
+    setLoading(true);
     try {
       const results = await fetchSearchedMovies(query);
       setMovies(results);
@@ -39,6 +51,7 @@ export default function MovieListScreen() {
       setError(err.message);
     } finally {
       setSearching(false);
+      setLoading(false);
     }
   };
 
@@ -49,14 +62,17 @@ export default function MovieListScreen() {
   const handleCloseSearch = () => {
     setSearchVisible(false);
     setError(null);
-    fetchPopularMovies()
+    fetchMoviesByCategory(category)
       .then(setMovies)
       .catch((err) => setError(err.message));
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      <Text style={styles.logo}>🎬</Text>
+      <Text style={styles.header}>MovieMax</Text>
       {error && <ErrorBox message={error} onClose={() => setError(null)} />}
+      <CategoryTabs selected={category} onSelect={handleCategoryChange} />
       {searchVisible ? (
         <SearchBar onSearch={handleSearch} onClose={handleCloseSearch} loading={searching} />
       ) : (
@@ -64,7 +80,13 @@ export default function MovieListScreen() {
           <Text style={styles.searchButtonText}>Film Ara</Text>
         </TouchableOpacity>
       )}
-      {searchVisible && !searching && movies.length === 0 ? (
+      {loading ? (
+        <View>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <MovieCardSkeleton key={i} />
+          ))}
+        </View>
+      ) : searchVisible && !searching && movies.length === 0 ? (
         <View style={styles.noResultBox}>
           <Text style={styles.noResultText}>Aradığınız film bulunamadı.</Text>
         </View>
@@ -86,6 +108,20 @@ export default function MovieListScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: SPACING.xl, paddingHorizontal: SPACING.lg, backgroundColor: COLORS.background },
+  logo: {
+    fontSize: 40,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
+  },
+  header: {
+    fontSize: FONT.size.xl,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+    fontFamily: FONT.family.bold,
+    textAlign: 'center',
+    marginBottom: SPACING.lg,
+    letterSpacing: 1,
+  },
   errorBox: {
     backgroundColor: COLORS.error,
     padding: SPACING.md,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Movie } from '../entities/Movie';
 import { Actor } from '../entities/Actor';
@@ -14,7 +14,7 @@ import MovieOverview from '../components/MovieOverview';
 import ActorList from '../components/ActorList';
 import ErrorBox from '../components/ErrorBox';
 import { MovieVideoDto } from '../dtos/MovieVideoDto';
-import { WebView } from 'react-native-webview';
+import TrailerModal from '../components/TrailerModal';
 
 type RootStackParamList = {
   MovieDetail: { movie: Movie };
@@ -91,20 +91,13 @@ export default function MovieDetailScreen() {
         <ActorList actors={actors} imageBaseUrl={IMAGE_URL} />
       </View>
       {/* Trailer Modal */}
-      <Modal visible={trailerModalVisible} animationType="slide" onRequestClose={() => setTrailerModalVisible(false)}>
-        <View style={{ flex: 1, backgroundColor: '#000' }}>
-          <TouchableOpacity style={styles.closeModalButton} onPress={() => setTrailerModalVisible(false)}>
-            <Text style={styles.closeModalButtonText}>Kapat</Text>
-          </TouchableOpacity>
-          {trailer && (
-            <WebView
-              style={{ flex: 1 }}
-              source={{ uri: `https://www.youtube.com/embed/${trailer.key}` }}
-              allowsFullscreenVideo
-            />
-          )}
-        </View>
-      </Modal>
+      {trailer && (
+        <TrailerModal
+          visible={trailerModalVisible}
+          onClose={() => setTrailerModalVisible(false)}
+          trailerKey={trailer.key}
+        />
+      )}
     </ScrollView>
   );
 }
@@ -136,16 +129,6 @@ const styles = StyleSheet.create({
     margin: SPACING.lg,
   },
   trailerButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: FONT.size.md,
-  },
-  closeModalButton: {
-    backgroundColor: COLORS.error,
-    padding: SPACING.md,
-    alignItems: 'center',
-  },
-  closeModalButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: FONT.size.md,

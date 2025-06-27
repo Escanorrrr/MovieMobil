@@ -10,7 +10,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="MovieList" component={MovieListScreen} options={{ title: 'Popüler Filmler' }} />
+        <Stack.Screen name="MovieList" component={MovieListScreen} options={{ headerShown: false }} />
         <Stack.Screen name="MovieDetail" component={MovieDetailScreen} options={{ title: 'Film Detayı' }} />
       </Stack.Navigator>
     </NavigationContainer>

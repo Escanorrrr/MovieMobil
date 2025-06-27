@@ -16,6 +16,21 @@ export interface MovieVideo {
   type: string;
 }
 
+export type MovieCategory = 'popular' | 'now_playing' | 'top_rated' | 'upcoming';
+
+export async function fetchMoviesByCategory(category: MovieCategory): Promise<Movie[]> {
+  try {
+    const res = await fetch(`${BASE_URL}/movie/${category}?api_key=${API_KEY}&language=en-US&page=1`);
+    if (!res.ok) {
+      throw new Error('Filmler alınamadı. Sunucu hatası!');
+    }
+    const data = await res.json();
+    return data.results;
+  } catch (error: any) {
+    throw new Error(error.message || 'Bilinmeyen bir hata oluştu.');
+  }
+}
+
 export async function fetchPopularMovies(): Promise<Movie[]> {
   try {
     const res = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}&language=en-US&page=1`);
